@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Avengers' Showdown</title>
+    <link rel="shortcut icon" type="image/jpg" href="https://static.thenounproject.com/png/709-200.png">
+    <style>
+        *{margin: 0;}
+        body{
+            background-color: black;
+        }
+        #score{
+            text-align: center;
+            color: white;
+            font-size: 24px;
+            font-weight: bold;
+        }
+        #game{
+            width: 800px;
+            height: 400px;
+            margin: auto;
+            overflow: hidden;
+            background-image: url("Assests/backgroundd.png");
+            background-size: contain;
+        }
+        .player{
+            width: 32px;
+            height: 48px;
+            overflow: hidden;
+            position: relative;
+        }
+        #player1{
+            left: 60px;
+            top: 276px;
+        }
+        #player1 img{
+            position: relative;
+            top: -96px;
+        }
+        #player2{
+            left: 768px;
+            top: 228px;
+        }
+        #player2 img{
+            position: relative;
+            top: -48px;
+        }
+        .parallax{
+            animation: parallax 60s linear infinite;
+        }
+        .walk{
+            animation: walking .5s steps(4) infinite;
+        }
+        .attack{
+            animation: attacking 2s linear infinite;
+        }
+        .jump{
+            animation: jumping .5s;
+        }
+        .dead{
+            transform-origin: bottom left;
+            animation: dying .5s forwards;
+        }
+        #player2.celebrate img{
+            animation: walking .5s steps(4) infinite, celebrating 1s steps(4) infinite;
+        }
+
+        @keyframes parallax{
+            from{background-position:0 0;}
+            to{background-position:-800px 0;}
+        }
+        @keyframes walking{
+            0%{transform: translate3d(0,0,0);}
+            100%{transform: translate3d(-100%,0,0);}
+        }
+        @keyframes attacking{
+            0%{left: 768px;}
+            100%{left: -50px;}
+        }
+        @keyframes jumping{
+            0%{top:276px;}
+            50%{top:176px;}
+            100%{top:276px;}
+        }
+        @keyframes dying{
+            0%{transform: rotate(0deg);}
+            100%{transform: rotate(-90deg);}
+        }
+        @keyframes celebrating{
+            0%{top:0px;}
+            100%{top:-192px;}
+        }
+    </style>
+</head>
+<body>
+    <div id="score">
+        Press SPACEBAR to start
+    </div>
+    <div id="game">
+        <div id="player1" class="player">
+            <img src="Assests/loki.png">
+        </div>
+        <div id="player2" class="player">
+            <img src="Assests/thor.png">
+        </div>
+    </div>
+    <script>
+        characters = [
+            "Assests/captainamerica_shield.png",
+            "Assests/blackwidow.png",
+            "Assests/hawkeye.png",
+            "Assests/ironman (1).png",
+            "Assests/nickfury.png",
+            "Assests/thor.png",
+            "Assests/loki.png"
+        ];
+        currentCharacterIndex = 0;
+
+        game = document.getElementById("game");
+        player1 = document.getElementById("player1");
+        player2 = document.getElementById("player2");
+        score = document.getElementById("score");
+
+        jump = new Audio("Assests/Jump-SoundBible.com-1007297584.mp3");
+        celebrate = new Audio("Assests/Civil War drummer -SoundBible.com-700036269.mp3");
+
+        var gameOver = false;
+        var distance = 0;
+
+        document.addEventListener("keypress", function(event){
+            if(!player1.classList.contains("jump")){
+                player1.classList.add("jump");
+                jump.play();
+
+                if(currentCharacterIndex < characters.length - 1){
+                    currentCharacterIndex++;
+                }else{
+                    currentCharacterIndex = 0;
+                }
+
+                player2.children[0].src = characters[currentCharacterIndex];
+
+                setTimeout(
+                    function(){
+                        player1.classList.remove("jump");
+                        jump.pause();
+                    },
+                    500
+                );
+            }
+
+            game.classList.add("parallax");
+
+            player1.children[0].classList.add("walk");
+            player1.classList.remove("dead");
+
+            player2.classList.add("attack");
+            player2.children[0].classList.add("walk");
+            player2.classList.remove("celebrate");
+            celebrate.pause();
+
+            if(!gameOver){
+                setInterval(
+                    function(){
+                        player1Top = parseInt(window.getComputedStyle(player1).getPropertyValue("top"));
+                        player2Left = parseInt(window.getComputedStyle(player2).getPropertyValue("left"));
+
+                        if(player2Left > 60 && player2Left < 82 && player1Top >= 228){
+                            gameOver = true;
+                            distance = 0;
+
+                            game.classList.remove("parallax");
+
+                            player1.children[0].classList.remove("walk");
+                            player1.classList.add("dead");
+
+                            player2.style.left = player2Left + "px";
+                            player2.classList.remove("attack");
+                            player2.classList.add("celebrate");
+                            celebrate.play();
+                        }else{
+                            distance++;
+                            score.innerHTML = "Score: " + parseInt(distance/10);
+                        }
+                    },
+                    10
+                );
+            }
+        });
+    </script>
+</body>
+</html>
